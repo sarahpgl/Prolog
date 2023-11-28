@@ -12,8 +12,10 @@ tour(Joueur,Grille) :-
     gagne(Joueur,Grille), % On vérifie si le joueur a gagné
     !, % On coupe pour éviter de chercher d'autres solutions
     write(Joueur), write(' a gagné !'), nl. % On affiche le message de victoire
-
-
+tour(Joueur,Grille) :-
+    grille_pleine(Grille), % On vérifie si la grille est pleine
+    !, % On coupe pour éviter de chercher d'autres solutions
+    write('Match nul!') ,nl. % On affiche le message de match nul
 tour(Joueur,Grille) :-
     write('Tour de '), write(Joueur), nl, % On affiche le tour du joueur
     choix_colonne(Joueur,Grille,Colonne), % On choisit une colonne
@@ -136,6 +138,13 @@ affiche_case(ia) :- % Si la case est occupée par l'ia, on affiche un O jaune
 gagne(Joueur,Grille) :-
     aligne(Joueur,Grille,4). % On vérifie si le joueur a aligné 4 pions
 
+grille_pleine([]).
+
+% Définition du prédicat qui vérifie si la grille est pleine
+greine_pleine([Col|Grille]) :-
+    not(member(vide,Col)),
+    greine_pleine(Grille).
+
 % Définition du prédicat qui vérifie si un joueur a aligné un nombre de pions
 aligne(Joueur,Grille,NbPions) :-
     horizontal(Joueur,Grille,NbPions). % On vérifie si le joueur a aligné NbPions pions horizontalement
@@ -214,8 +223,4 @@ ajouter_tete(_,[],[]). % Si la liste de listes est vide, on ne fait rien
 ajouter_tete(X,[Ligne|Reste],[[X|Ligne]|ResteAjoute]) :- % Sinon, on ajoute X à la tête de la première liste et on continue avec le reste
     ajouter_tete(X,Reste,ResteAjoute). % On appelle récursivement le prédicat
 
-% Définition du prédicat qui vérifie si la grille est pleine
-grille_pleine(Grille) :-
-    forall(member(Ligne,Grille), % Pour chaque ligne de la grille
-           forall(member(Case,Ligne), % Pour chaque case de la ligne
-                  nonvar(Case))). % La case n'est pas une variable
+
