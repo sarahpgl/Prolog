@@ -12,10 +12,8 @@ tour(Joueur,Grille) :-
     gagne(Joueur,Grille), % On vérifie si le joueur a gagné
     !, % On coupe pour éviter de chercher d'autres solutions
     write(Joueur), write(' a gagné !'), nl. % On affiche le message de victoire
-tour(Joueur,Grille) :-
-    grille_pleine(Grille), % On vérifie si la grille est pleine
-    !, % On coupe pour éviter de chercher d'autres solutions
-    write('Match nul !'), nl. % On affiche le message de match nul
+
+
 tour(Joueur,Grille) :-
     write('Tour de '), write(Joueur), nl, % On affiche le tour du joueur
     choix_colonne(Joueur,Grille,Colonne), % On choisit une colonne
@@ -92,25 +90,47 @@ affiche_grille(Grille) :-
 affiche_lignes([]) :- % Si la grille est vide, on ne fait rien
     !. % On coupe pour éviter de chercher d'autres solutions
 affiche_lignes([Ligne|Reste]) :- % Sinon, on affiche la première ligne et on continue avec le reste
+    affiche_separateur, % On affiche un séparateur horizontal
     affiche_ligne(Ligne), % On affiche la première ligne
     nl, % On saute une ligne
     affiche_lignes(Reste). % On appelle récursivement le prédicat
+affiche_lignes(_) :- % Quand on a fini d'afficher les lignes, on affiche un dernier séparateur
+    affiche_separateur.
+
+% Définition du prédicat qui affiche un séparateur horizontal
+affiche_separateur :-
+    write('\033[1m'), % On active le mode gras
+    write('┌'), % On affiche le coin supérieur gauche
+    write('──┬──┬──┬──┬──┬──┬─'), % On répète 6 fois le trait horizontal et le séparateur vertical
+    write('─┐'), % On affiche le trait horizontal et le coin supérieur droit
+    write('\033[0m'), % On réinitialise le mode normal
+    nl. % On saute une ligne
 
 % Définition du prédicat qui affiche une ligne d'une grille
 affiche_ligne([]) :- % Si la ligne est vide, on ne fait rien
     !. % On coupe pour éviter de chercher d'autres solutions
 affiche_ligne([Case|Reste]) :- % Sinon, on affiche la première case et on continue avec le reste
+    write('\033[1m'), % On active le mode gras
+    write('│'), % On affiche le séparateur vertical
+    write('\033[0m'), % On réinitialise le mode normal
     affiche_case(Case), % On affiche la première case
     write(' '), % On écrit un espace
     affiche_ligne(Reste). % On appelle récursivement le prédicat
 
+
+
 % Définition du prédicat qui affiche une case d'une grille
 affiche_case(vide) :- % Si la case est vide, on affiche un point
     write('.').
-affiche_case(humain) :- % Si la case est occupée par l'humain, on affiche un X
-    write('X').
-affiche_case(ia) :- % Si la case est occupée par l'ia, on affiche un O
-    write('O').
+affiche_case(humain) :- % Si la case est occupée par l'humain, on affiche un X rouge
+    write('\033[31m'), % On change la couleur en rouge
+    write('X'), % On affiche le X
+    write('\033[0m'). % On réinitialise la couleur
+affiche_case(ia) :- % Si la case est occupée par l'ia, on affiche un O jaune
+    write('\033[33m'), % On change la couleur en jaune
+    write('O'), % On affiche le O
+    write('\033[0m'). % On réinitialise la couleur
+
 
 % Définition du prédicat qui vérifie si un joueur a gagné
 gagne(Joueur,Grille) :-
@@ -193,3 +213,9 @@ diagonales_ligne([X|Reste],[[X]|DiagonalesReste]) :- % Sinon, on crée une diago
 ajouter_tete(_,[],[]). % Si la liste de listes est vide, on ne fait rien
 ajouter_tete(X,[Ligne|Reste],[[X|Ligne]|ResteAjoute]) :- % Sinon, on ajoute X à la tête de la première liste et on continue avec le reste
     ajouter_tete(X,Reste,ResteAjoute). % On appelle récursivement le prédicat
+
+% Définition du prédicat qui vérifie si la grille est pleine
+grille_pleine(Grille) :-
+    forall(member(Ligne,Grille), % Pour chaque ligne de la grille
+           forall(member(Case,Ligne), % Pour chaque case de la ligne
+                  nonvar(Case))). % La case n'est pas une variable
