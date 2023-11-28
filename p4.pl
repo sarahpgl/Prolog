@@ -81,57 +81,43 @@ grille_vide([[vide,vide,vide,vide,vide,vide],
              [vide,vide,vide,vide,vide,vide],
              [vide,vide,vide,vide,vide,vide]]).
 
-% Définition du prédicat qui affiche une grille
+% Définition du prédicat qui affiche une grille avec les numéros de colonnes
 affiche_grille(Grille) :-
-    transpose(Grille,GrilleTransposee), % On transpose la grille pour afficher les colonnes comme des lignes
-    reverse(GrilleTransposee,GrilleInversee), % On inverse la grille pour afficher la case en bas à gauche en premier
+    transpose(Grille, GrilleTransposee), % On transpose la grille pour afficher les colonnes comme des lignes
+    reverse(GrilleTransposee, GrilleInversee), % On inverse la grille pour afficher la case en bas à gauche en premier
     affiche_lignes(GrilleInversee), % On affiche les lignes de la grille
+    affiche_numeros_colonnes, % On affiche les numéros de colonnes
     nl. % On saute une ligne
+
+% Définition du prédicat qui affiche les numéros de colonnes
+affiche_numeros_colonnes :-
+    write('1 2 3 4 5 6 7'), nl. % On affiche les numéros de colonnes sous le plateau
 
 % Définition du prédicat qui affiche les lignes d'une grille
 affiche_lignes([]) :- % Si la grille est vide, on ne fait rien
     !. % On coupe pour éviter de chercher d'autres solutions
 affiche_lignes([Ligne|Reste]) :- % Sinon, on affiche la première ligne et on continue avec le reste
-    affiche_separateur, % On affiche un séparateur horizontal
     affiche_ligne(Ligne), % On affiche la première ligne
     nl, % On saute une ligne
     affiche_lignes(Reste). % On appelle récursivement le prédicat
-affiche_lignes(_) :- % Quand on a fini d'afficher les lignes, on affiche un dernier séparateur
-    affiche_separateur.
-
-% Définition du prédicat qui affiche un séparateur horizontal
-affiche_separateur :-
-    write('\033[1m'), % On active le mode gras
-    write('┌'), % On affiche le coin supérieur gauche
-    write('──┬──┬──┬──┬──┬──┬─'), % On répète 6 fois le trait horizontal et le séparateur vertical
-    write('─┐'), % On affiche le trait horizontal et le coin supérieur droit
-    write('\033[0m'), % On réinitialise le mode normal
-    nl. % On saute une ligne
 
 % Définition du prédicat qui affiche une ligne d'une grille
 affiche_ligne([]) :- % Si la ligne est vide, on ne fait rien
     !. % On coupe pour éviter de chercher d'autres solutions
 affiche_ligne([Case|Reste]) :- % Sinon, on affiche la première case et on continue avec le reste
-    write('\033[1m'), % On active le mode gras
-    write('│'), % On affiche le séparateur vertical
-    write('\033[0m'), % On réinitialise le mode normal
     affiche_case(Case), % On affiche la première case
     write(' '), % On écrit un espace
     affiche_ligne(Reste). % On appelle récursivement le prédicat
 
 
-
-% Définition du prédicat qui affiche une case d'une grille
+% Définition du prédicat qui affiche une case d'une grille avec couleur
 affiche_case(vide) :- % Si la case est vide, on affiche un point
-    write('.').
-affiche_case(humain) :- % Si la case est occupée par l'humain, on affiche un X rouge
-    write('\033[31m'), % On change la couleur en rouge
-    write('X'), % On affiche le X
-    write('\033[0m'). % On réinitialise la couleur
-affiche_case(ia) :- % Si la case est occupée par l'ia, on affiche un O jaune
-    write('\033[33m'), % On change la couleur en jaune
-    write('O'), % On affiche le O
-    write('\033[0m'). % On réinitialise la couleur
+    write('\e[94m.\e[0m').
+affiche_case(humain) :- % Si la case est occupée par l'humain, on affiche un X en bleu
+    write('\e[93mX\e[0m').
+affiche_case(ia) :- % Si la case est occupée par l'ia, on affiche un O en rouge
+    write('\e[91mO\e[0m').
+
 
 
 % Définition du prédicat qui vérifie si un joueur a gagné
