@@ -5,7 +5,8 @@
 jeu :- 
     grille_vide(Grille), % On crée une grille vide
     affiche_grille(Grille), % On affiche la grille
-    tour(humain,Grille). % C'est le tour de l'humain
+    tour(humain,Grille)
+    . % C'est le tour de l'humain
 
 % Définition du prédicat qui gère le tour d'un joueur
 tour(Joueur,Grille) :-
@@ -27,6 +28,8 @@ tour(Joueur,Grille) :-
 % Définition du prédicat qui choisit une colonne selon le joueur
 choix_colonne(humain,Grille,Colonne) :-
     repeat, % On répète jusqu'à avoir une colonne valide
+    moves(Grille, L),
+    write(L),
     write('Choisissez une colonne (1-7) : '), % On demande à l'humain de choisir une colonne
     read(Colonne), % On lit la colonne entrée par l'humain
     colonne_valide(Colonne), % On vérifie que la colonne est valide
@@ -209,4 +212,9 @@ ajouter_tete(_,[],[]). % Si la liste de listes est vide, on ne fait rien
 ajouter_tete(X,[Ligne|Reste],[[X|Ligne]|ResteAjoute]) :- % Sinon, on ajoute X à la tête de la première liste et on continue avec le reste
     ajouter_tete(X,Reste,ResteAjoute). % On appelle récursivement le prédicat
 
+evaluate(B, C) :- C is B.
 
+moves(B, L):-
+    a(colonne_non_pleine(B, 1), R),!,
+    write(R),
+    findall(Column, colonne_non_pleine(B, Column), L).
