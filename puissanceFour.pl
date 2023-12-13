@@ -1,4 +1,5 @@
 :- use_module(library(clpfd)).
+:- dynamic memo/3. % Dynamic predicate for memoization
 
 
 % Définition du prédicat qui lance le jeu
@@ -269,7 +270,7 @@ meilleur_coup(Grille, Colonne, Val) :-
     best(Liste_coups, Grille, Prof_max, Colonne, Val). % On cherche le meilleur coup parmi la liste
 
 % Définition du prédicat qui renvoie la profondeur maximale
-prof_max(2). % On peut modifier la profondeur maximale ici 
+prof_max(3). % On peut modifier la profondeur maximale ici 
 /*
          /\
         /  \
@@ -295,24 +296,40 @@ best([Coup1|Liste_coups], Grille, Prof, MeilleurCoup, MeilleurVal) :- % S'il y a
     best(Liste_coups, Grille, Prof, Coup2, Val2), % On cherche le meilleur coup parmi le reste de la liste
     better(Coup1, Val1, Coup2, Val2, MeilleurCoup, MeilleurVal). % On compare les deux coups et on garde le meilleur
 
-% Définition du prédicat qui implémente l'algorithme minmax
-minmax(Grille, Prof, Joueur, Val) :-
-    (partie_finie(Grille) ; Prof = 0), % Si la partie est finie ou si la profondeur est nulle, on évalue le plateau
-    eval_plateau(Grille, Val),
-    !. % On coupe pour éviter de chercher d'autres solutions
-minmax(Grille, Prof, Joueur, Val) :-
-    coups_possibles(Grille, Liste_coups), % Sinon, on récupère la liste des coups possibles
-    Prof1 is Prof - 1, % On décrémente la profondeur
-    change_joueur(Joueur,AutreJoueur), % On change de joueur
-    eval_liste(Liste_coups, Grille, Prof1, Adversaire, Liste_vals), % On évalue la liste des coups
-    (Joueur = ia -> max_liste(Liste_vals, Val) ; min_liste(Liste_vals, Val)). % On choisit le maximum ou le minimum selon le joueur
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Updated minmax predicate with memoization
+    minmax(Grille, Prof, Joueur, Val) :-
+        (partie_finie(Grille) ; Prof = 0),
+        eval_plateau(Grille, Val),
+        !.
+    minmax(Grille, Prof, Joueur, Val) :-
+        coups_possibles(Grille, Liste_coups),
+        Prof1 is Prof - 1,
+        change_joueur(Joueur, AutreJoueur),
+        eval_liste_memo(Liste_coups, Grille, Prof1, AutreJoueur, Liste_vals), % Use memoized version
+        (Joueur = ia -> max_liste(Liste_vals, Val) ; min_liste(Liste_vals, Val)).
+    
+    % Updated eval_liste predicate with memoization
+    eval_liste_memo([], _, _, _, []).
+    eval_liste_memo([Coup|Liste_coups], Grille, Prof, Joueur, [Val|Liste_vals]) :-
+        ajoute_pion(Joueur, Grille, Coup, NouvelleGrille),
+        memo(NouvelleGrille, Prof, Val), % Try to get the value from memo
+        !, % Cut to succeed only if the memo entry is found
+        eval_liste_memo(Liste_coups, Grille, Prof, Joueur, Liste_vals).
+    eval_liste_memo([Coup|Liste_coups], Grille, Prof, Joueur, [Val|Liste_vals]) :-
+        ajoute_pion(Joueur, Grille, Coup, NouvelleGrille),
+        minmax(NouvelleGrille, Prof, Joueur, Val),
+        assertz(memo(NouvelleGrille, Prof, Val)), % Store the result in memo
+        eval_liste_memo(Liste_coups, Grille, Prof, Joueur, Liste_vals).
+
 
 % Définition du prédicat qui évalue la liste des coups possibles
-eval_liste([], _, _, _, []). % Si la liste est vide, on renvoie une liste vide
-eval_liste([Coup|Liste_coups], Grille, Prof, Joueur, [Val|Liste_vals]) :- % Sinon, on évalue le premier coup et on continue avec le reste de la liste
-    ajoute_pion(Joueur, Grille, Coup, NouvelleGrille), % On joue le coup
-    minmax(NouvelleGrille, Prof, Joueur, Val), % On évalue le coup selon l'algorithme minmax
-    eval_liste(Liste_coups, Grille, Prof, Joueur, Liste_vals). % On évalue le reste de la liste
+%eval_liste([], _, _, _, []). % Si la liste est vide, on renvoie une liste vide
+%eval_liste([Coup|Liste_coups], Grille, Prof, Joueur, [Val|Liste_vals]) :- % Sinon, on évalue le premier coup et on continue avec le reste de la liste
+    %ajoute_pion(Joueur, Grille, Coup, NouvelleGrille), % On joue le coup
+    %minmax(NouvelleGrille, Prof, Joueur, Val), % On évalue le coup selon l'algorithme minmax
+    %eval_liste(Liste_coups, Grille, Prof, Joueur, Liste_vals). % On évalue le reste de la liste
 
 % Définition du prédicat qui renvoie le maximum d'une liste
 max_liste([X], X). % Si la liste n'a qu'un élément, c'est le maximum
