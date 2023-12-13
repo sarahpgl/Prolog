@@ -16,34 +16,28 @@ tour(Joueur,Grille) :-
     !, % On coupe pour éviter de chercher d'autres solutions
     write(Joueur), write(' a gagné !'), nl. % On affiche le message de victoire
 
-
 tour(Joueur,Grille) :-
     grille_pleine(Grille), % On vérifie si la grille est pleine
     !, % On coupe pour éviter de chercher d'autres solutions
     write('Match nul!') ,nl. % On affiche le message de match nul
 
-    tour(Joueur,Grille) :-
-        (   gagne(ia,Grille) % On vérifie si le joueur a gagné
-        ->  write('IA a gagné.'), nl % Si le joueur a gagné, on affiche un message
-        ;   write('Tour de '), write(Joueur), nl, % Sinon, on continue le jeu
-            choix_colonne(Joueur,Grille,Colonne), % On choisit une colonne
-            ajoute_pion(Joueur,Grille,Colonne,NouvelleGrille), % On ajoute le pion du joueur dans la colonne choisie
-            affiche_grille(NouvelleGrille), % On affiche la nouvelle grille
-            change_joueur(Joueur,AutreJoueur), % On change de joueur
-            tour(AutreJoueur,NouvelleGrille) % On continue le jeu avec l'autre joueur
-        ).
+tour(Joueur,Grille) :-
+    write('Tour de '), write(Joueur), nl,
+    choix_colonne(Joueur,Grille,Colonne), % On choisit une colonne
+    ajoute_pion(Joueur,Grille,Colonne,NouvelleGrille), % On ajoute le pion du joueur dans la colonne choisie
+    affiche_grille(NouvelleGrille), % On affiche la nouvelle grille
+    change_joueur(Joueur,AutreJoueur), % On change de joueur
+    tour(AutreJoueur,NouvelleGrille). % On continue le jeu avec l'autre joueur
     
-
 % Définition du prédicat qui donne une matrice de poids pour chaque case
 matrice_poids([
-    [3,4,5,7,5,4,3],
-    [4,6,8,10,8,6,4],
-    [5,8,11,13,11,8,5],
-    [5,8,11,13,11,8,5],
-    [4,6,8,10,8,6,4],
-    [3,4,5,7,5,4,3]
+    [ 3, 4, 5, 7, 5, 4, 3],
+    [ 4, 6, 8,10, 8, 6, 4],
+    [ 5, 8,11,13,11, 8, 5],
+    [ 5, 8,11,13,11, 8, 5],
+    [ 4, 6, 8,10, 8, 6, 4],
+    [ 3, 4, 5, 7, 5, 4, 3]
 ]).
-
 
 % Définition du prédicat qui choisit une colonne selon le joueur
 choix_colonne(humain,Grille,Colonne) :-
@@ -58,7 +52,6 @@ choix_colonne(humain,Grille,Colonne) :-
 choix_colonne(ia, Grille, Colonne) :-
     meilleur_coup(Grille, Colonne, Val), % On appelle le prédicat qui renvoie le meilleur coup selon l'algorithme minmax
     write('L''IA joue dans la colonne '), write(Colonne), write(' avec une valeur de '), write(Val), nl. % On affiche le coup choisi par l'IA
-
 
 % Définition du prédicat qui vérifie si une colonne est valide
 colonne_valide(Colonne) :-
@@ -76,14 +69,6 @@ ajoute_pion(Joueur,Grille,Colonne,NouvelleGrille) :-
     ligne(Grille,Colonne,Ligne), % On trouve la ligne où le pion va tomber
     remplacer(ColonneGrille,Ligne,Joueur,NouvelleColonne), % On remplace la case vide par le pion du joueur
     remplacer(Grille,Colonne,NouvelleColonne,NouvelleGrille). % On remplace la colonne par la nouvelle colonne
-
-/* Plus besoin grace au nouveau predicat ligne !!!!!!!!!!!!!!!
-% Définition du prédicat qui ajoute un pion dans une colonne
-ajoute_pion_colonne(Joueur,[vide|Reste],[Joueur|Reste]) :- % Si la première case est vide, on la remplace par le pion du joueur
-    !. % On coupe pour éviter de chercher d'autres solutions
-ajoute_pion_colonne(Joueur,[X|Reste],[X|NouveauReste]) :- % Sinon, on garde la première case et on continue avec le reste de la colonne
-    ajoute_pion_colonne(Joueur,Reste,NouveauReste).
-*/
 
 % Définition du prédicat qui remplace un élément d'une liste par un autre
 remplacer([_|Reste],1,X,[X|Reste]) :- % Si l'indice est 1, on remplace le premier élément par X
@@ -105,6 +90,7 @@ grille_vide([[vide,vide,vide,vide,vide,vide],
              [vide,vide,vide,vide,vide,vide],
              [vide,vide,vide,vide,vide,vide],
              [vide,vide,vide,vide,vide,vide]]).
+
 
 % Définition du prédicat qui affiche une grille avec les numéros de colonnes
 affiche_grille(Grille) :-
@@ -134,7 +120,6 @@ affiche_ligne([Case|Reste]) :- % Sinon, on affiche la première case et on conti
     write(' '), % On écrit un espace
     affiche_ligne(Reste). % On appelle récursivement le prédicat
 
-
 % Définition du prédicat qui affiche une case d'une grille avec couleur
 affiche_case(vide) :- % Si la case est vide, on affiche un point
     write('\e[94m.\e[0m').
@@ -144,16 +129,15 @@ affiche_case(ia) :- % Si la case est occupée par l'ia, on affiche un O en rouge
     write('\e[91mO\e[0m').
 
 
-
 % Définition du prédicat qui vérifie si un joueur a gagné
 gagne(Joueur,Grille) :-
     aligne(Joueur,Grille,4). % On vérifie si le joueur a aligné 4 pions
-grille_pleine([]).
 
 % Définition du prédicat qui vérifie si la grille est pleine
-grille_pleine([Col|Grille]) :-
+grille_pleine([]).
+grille_pleine([Col|ResteGrille]) :-
     not(member(vide,Col)),
-    grille_pleine(Grille).
+    grille_pleine(ResteGrille).
 
 % Définition du prédicat qui vérifie si un joueur a aligné un nombre de pions
 aligne(Joueur,Grille,NbPions) :-
@@ -170,8 +154,8 @@ horizontal(Joueur,Grille,NbPions) :-
 
 % Définition du prédicat qui vérifie si un joueur a aligné un nombre de pions dans une ligne
 horizontal_ligne(Joueur,Ligne,NbPions) :-
-    append(_,Suite,Ligne), % On choisit une sous-liste de la ligne
-    append(Pions,_,Suite), % On choisit une sous-liste de la sous-liste
+    append(_,Suite,Ligne), % On choisit une sous-liste (droit)de la ligne
+    append(Pions,_,Suite), % On choisit une sous-liste (gauche) de la sous-liste
     length(Pions,NbPions), % On vérifie que la sous-liste a la longueur voulue
     tous_egaux(Joueur,Pions). % On vérifie que la sous-liste ne contient que des pions du joueur
 
@@ -254,13 +238,6 @@ ligne2([_|Reste],LigneCourante,Ligne) :-
     LigneSuivante is LigneCourante + 1, % On incrémente la ligne
     ligne2(Reste,LigneSuivante,Ligne). % On continue avec le reste de la colonne
 
-
-% Définition du prédicat qui vérifie si un élément appartient à une liste
-element(Elem,Liste) :-
-    member(Elem,Liste). % On utilise le prédicat prédéfini member/2
-
-
-    %%%%
 
 
 % Définition du prédicat qui choisit le meilleur coup selon l'algorithme minmax
@@ -357,17 +334,11 @@ partie_nulle(Grille) :-
 % Définition du prédicat qui récupère les coups possibles dans une grille
 coups_possibles(Grille, Coups) :-
     length(Grille, NbColonnes), % On récupère le nombre de colonnes dans la grille
-    findall(Colonne, (between(1, NbColonnes, Colonne), \+ colonne_pleine(Colonne, Grille)), Coups). % On génère les colonnes non pleines
-
-% Définition du prédicat qui vérifie si une colonne est pleine dans une grille
-colonne_pleine(Colonne, Grille) :-
-    nth1(Colonne, Grille, Col), % On récupère la colonne correspondante
-    \+ member(vide, Col). % On vérifie si la colonne ne contient pas de case vide
+    findall(Colonne, (between(1, NbColonnes, Colonne), colonne_non_pleine(Grille,Colonne)), Coups). % On génère les colonnes non pleines
 
 % Définition du prédicat qui vérifie si la partie est finie
-partie_finie(Grille) :-
-    gagne(ia, Grille) ; % On vérifie si l'IA a gagné
-    gagne(humain, Grille) ; % On vérifie si l'humain a gagné
+partie_finie(Grille) :- 
+    gagne(_, Grille) ; % On vérifie si l'quelqun a gagné
     partie_nulle(Grille). % On vérifie si la partie est nulle
 
     % Définition du prédicat qui évalue la valeur d'un plateau
@@ -422,10 +393,8 @@ valeur(humain, -1).
 
 
 
-
-
-
 %%
+
 % totalSumscore(Grille, Joueur, TotalSumscore) is true if TotalSumscore is the sum of sumscoreligne and sumscorecolonne
 totalSumscore(Grille, Joueur, TotalSumscore) :-
     sumScoreLigne(Grille, Joueur, ScoreLigne),
@@ -463,9 +432,7 @@ sumScoreColonneHelper(Grille, Joueur, NumColonne, ScoreTotal) :-
 % compte_ligne(Grille, Joueur, NumLigne, Score) est vrai si Score est le nombre de pions alignés
 % sur la même ligne pour le joueur Joueur dans la grille Grille à la ligne NumLigne
 compte_ligne(Grille, Joueur, NumLigne, Score) :-
-
     transpose(Grille, GrilleTransposee),
-
     % on récupère la ligne correspondante dans la grille
     nth1(NumLigne, GrilleTransposee, Ligne),
     % on compte le nombre de pions consécutifs du joueur dans la ligne
@@ -494,7 +461,6 @@ extrait_colonne([Ligne|Reste], NumColonne, [Element|Suite]) :-
 compte_consecutifs(Liste, Valeur, Score) :-
     % on initialise un compteur à 0
     compte_consecutifs(Liste, Valeur, 0, Score).
-
 % compte_consecutifs(Liste, Valeur, Compteur, Score) est vrai si Score est le nombre maximum
 % d'éléments consécutifs égaux à Valeur dans la liste Liste, en tenant compte du compteur courant
 compte_consecutifs([], _, Compteur, Compteur). % on renvoie le compteur quand la liste est vide
