@@ -105,6 +105,18 @@ grille_vide([[vide,vide,vide,vide,vide,vide],
              [vide,vide,vide,vide,vide,vide],
              [vide,vide,vide,vide,vide,vide],
              [vide,vide,vide,vide,vide,vide]]).
+<<<<<<< main
+=======
+/*
+[[11,12,13,14,15,16],
+ [21,22,23,24,25,26],
+ [31,32,33,34,35,36],
+ [41,42,43,44,45,46],
+ [51,52,53,54,55,56],
+ [61,62,63,64,65,66],
+ [71,72,73,74,75,76]]
+ */
+>>>>>>> local
 
 % Définition du prédicat qui affiche une grille avec les numéros de colonnes
 affiche_grille(Grille) :-
@@ -161,7 +173,7 @@ aligne(Joueur,Grille,NbPions) :-
 aligne(Joueur,Grille,NbPions) :-
     vertical(Joueur,Grille,NbPions). % On vérifie si le joueur a aligné NbPions pions verticalement
 aligne(Joueur,Grille,NbPions) :-
-    diagonal(Joueur,Grille,NbPions). % On vérifie si le joueur a aligné NbPions pions diagonalement
+    diagonal(Joueur,Grille). % On vérifie si le joueur a aligné NbPions pions diagonalement
 
 % Définition du prédicat qui vérifie si un joueur a aligné un nombre de pions horizontalement
 horizontal(Joueur,Grille,NbPions) :-
@@ -185,55 +197,15 @@ vertical(Joueur,Grille,NbPions) :-
     transpose(Grille,GrilleTransposee), % On transpose la grille pour avoir les colonnes comme des lignes
     horizontal(Joueur,GrilleTransposee,NbPions). % On vérifie si le joueur a aligné NbPions pions horizontalement dans la grille transposée
 
-% Définition du prédicat qui vérifie si un joueur a aligné un nombre de pions diagonalement
-diagonal(Joueur,Grille,NbPions) :-
-    diagonales(Grille,Diagonales), % On récupère les diagonales de la grille
-    member(Diagonale,Diagonales), % On choisit une diagonale
-    horizontal_ligne(Joueur,Diagonale,NbPions). % On vérifie si le joueur a aligné NbPions pions dans la diagonale
-
-% Définition du prédicat qui récupère les diagonales d'une grille
-diagonales(Grille,Diagonales) :-
-    diagonales_gauche(Grille,DiagonalesGauche), % On récupère les diagonales allant de gauche à droite
-    reverse(Grille,GrilleInversee), % On inverse la grille
-    diagonales_gauche(GrilleInversee,DiagonalesDroite), % On récupère les diagonales allant de droite à gauche
-    append(DiagonalesGauche,DiagonalesDroite,Diagonales). % On concatène les deux listes de diagonales
-
-% Définition du prédicat qui récupère les diagonales allant de gauche à droite d'une grille
-diagonales_gauche(Grille,Diagonales) :-
-    decaler(Grille,GrilleDecalee), % On décale la grille vers le bas
-    transpose(GrilleDecalee,GrilleTransposee), % On transpose la grille décalée
-    diagonales_lignes(GrilleTransposee,Diagonales). % On récupère les diagonales des lignes de la grille transposée
-
-% Définition du prédicat qui décale une grille vers le bas
-decaler([],[]). % Une grille vide est décalée en une grille vide
-decaler([Ligne|Reste],[LigneDecalee|ResteDecale]) :- % Sinon, on décale la première ligne et on continue avec le reste
-    decaler_ligne(Ligne,LigneDecalee), % On décale la première ligne
-    decaler(Reste,ResteDecale). % On appelle récursivement le prédicat
-
-% Définition du prédicat qui décale une ligne vers le bas
-decaler_ligne(Ligne,LigneDecalee) :-
-    append([vide],Ligne,LigneTemp), % On ajoute une case vide au début de la ligne
-    append(LigneDecalee,[_],LigneTemp). % On enlève la dernière case de la ligne
-
-% Définition du prédicat qui récupère les diagonales des lignes d'une grille
-diagonales_lignes([],[]). % Une grille vide n'a pas de diagonales
-diagonales_lignes([Ligne|Reste],Diagonales) :-
-    diagonales_ligne(Ligne,DiagonalesLigne), % On récupère les diagonales de la première ligne
-    diagonales_lignes(Reste,DiagonalesReste), % On appelle récursivement le prédicat avec le reste de la grille
-    append(DiagonalesLigne,DiagonalesReste,Diagonales). % On concatène les deux listes de diagonales
-
-% Définition du prédicat qui récupère les diagonales d'une ligne
-diagonales_ligne([],[]). % Une ligne vide n'a pas de diagonales
-diagonales_ligne([X|Reste],[[X]|DiagonalesReste]) :- % Sinon, on crée une diagonale avec la première case et on continue avec le reste
-    diagonales_ligne(Reste,DiagonalesTemp), % On appelle récursivement le prédicat avec le reste de la ligne
-    ajouter_tete(Reste,DiagonalesTemp,DiagonalesReste). % On ajoute la tête du reste de la ligne à chaque diagonale du reste
-
-% Définition du prédicat qui ajoute un élément à la tête de chaque liste d'une liste de listes
-ajouter_tete(_,[],[]). % Si la liste de listes est vide, on ne fait rien
-ajouter_tete(X,[Ligne|Reste],[[X|Ligne]|ResteAjoute]) :- % Sinon, on ajoute X à la tête de la première liste et on continue avec le reste
-    ajouter_tete(X,Reste,ResteAjoute). % On appelle récursivement le prédicat
-
-
+diagonal(Jouer,Grille):-
+    append(_,[C1,C2,C3,C4|_],Grille), % 4 colonnes consecutifs
+	append(P1,[Jouer|_],C1), % qui a un piéce du Jouer
+	append(P2,[Jouer|_],C2),
+	append(P3,[Jouer|_],C3),
+	append(P4,[Jouer|_],C4),
+	length(P1,L1), length(P2,L2), length(P3,L3), length(P4,L4),% on obtien la ligne
+    (L2 is L1+1, L3 is L2+1, L4 is L3+1;  %... diagonale gauche /
+     L2 is L1-1, L3 is L2-1, L4 is L3-1). %... diagonale droite \
 %%%
 
 % Définition du prédicat qui calcule le poids d'un coup
