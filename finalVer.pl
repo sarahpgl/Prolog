@@ -236,7 +236,7 @@ meilleur_coup(Grille, Colonne, Val) :-
     best(Liste_coups, Grille, Prof_max, Colonne, Val). % On cherche le meilleur coup parmi la liste
 
 % Définition du prédicat qui renvoie la profondeur maximale
-prof_max(1). % On peut modifier la profondeur maximale ici 
+prof_max(2). % On peut modifier la profondeur maximale ici 
 /*
          /\
         /  \
@@ -260,6 +260,7 @@ best([Coup1|Liste_coups], Grille, Prof, MeilleurCoup, MeilleurVal) :- % S'il y a
     ajoute_pion(ia, Grille, Coup1, NouvelleGrille1), % On joue le premier coup de l'IA
     minmax(NouvelleGrille1, Prof, humain, Val1), % On évalue le premier coup selon le point de vue de l'humain
     best(Liste_coups, Grille, Prof, Coup2, Val2), % On cherche le meilleur coup parmi le reste de la liste
+    write('Compare '), write(Coup1), write(' '), write(Val1), write(' et '), write(Coup2), write(' '), write(Val2), nl, % On affiche les deux coups et leurs valeurs
     better(Coup1, Val1, Coup2, Val2, MeilleurCoup, MeilleurVal). % On compare les deux coups et on garde le meilleur
 
 % Définition du prédicat qui implémente l'algorithme minmax
